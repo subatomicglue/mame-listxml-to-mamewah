@@ -1,0 +1,23 @@
+{
+  "name": "AnAmazingScript",
+  "version": "1.0.0",
+  "description": "sometimes you need npm packages for js scripts, enjoy",
+  "main": "convert.js",
+  "scripts": {
+    "start": "cat README.md",
+    "reinstall": "rm -rf node_modules; npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "scripts"
+  ],
+  "author": "kevin meinert",
+  "license": "SEE LICENSE IN license.txt",
+  "dependencies": {
+    "sax": "^1.2.4"
+  },
+  "devDependencies": {}
+}
