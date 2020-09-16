@@ -12,7 +12,7 @@ npm install
 
 ## usage:
 ```
-convert.js <pathto mame's>/listxml.xml <mamewah listfilename>.lst
+convert.js listxml.xml mamewah.lst
 ```
 
 
