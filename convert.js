@@ -20,7 +20,7 @@ Example:
 }
 let listxml = process.argv[2];
 let mamewahlst = process.argv[3];
-console.log( listxml, mamewahlst );
+console.log( "reading: ", listxml, " writing: ", mamewahlst );
 let stack = [];
 let machine = {};
 
@@ -30,15 +30,33 @@ const capitalize = (s) => {
   if (typeof s !== 'string') return ''
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
+
 const toUpperCase = (s) => {
   if (typeof s !== 'string') return ''
   return s.toUpperCase();
 }
+
 function sanitize( str ) {
   return str != undefined ? str : ""
 }
+
+function toDOS( str ) {
+  // \r is "Carriage Return" (CR, ASCII character 13)
+  // \n is "Line Feed" (LF, ASCII character 10)
+  // UNIX    - LF   \n
+  // Mac osX - LF   \n (it's unix afterall)
+  // Mac os9 - CR   \r
+  // DOS     - CRLF \r\n
+  if (str.match(/\r\n/))    // DOS
+    return str;
+  else if (str.match(/\r/)) // MAC
+    return str.replace( /\r/g, "\r\n" ); // output DOS CRLF
+  else if (str.match(/\n/)) // UNIX
+    return str.replace( /\n/g, "\r\n" ); // output DOS CRLF
+}
+
 function createBlock( machine ) {
-  return `${sanitize(machine.name)}
+  let str = `${sanitize(machine.name)}
 ${sanitize(machine.description)}
 ${sanitize(machine.year)}
 ${sanitize(machine.manufacturer)}
@@ -46,28 +64,28 @@ ${sanitize(toUpperCase(machine.romof))}
 ${sanitize(toUpperCase(machine.cloneof))}
 ${sanitize(capitalize(machine.display_type))}
 ${sanitize(capitalize(machine.display_orientation))}
-${sanitize(Object.keys( machine.input_types ).join(", "))}
+${sanitize(machine.input_types)}
 Status ${sanitize(capitalize(machine.status))}
 Color ${sanitize(capitalize(machine.status_color ? machine.status_color : machine.status))}
 Sound ${sanitize(capitalize(machine.status_sound ? machine.status_sound : machine.status))}
 
 `;
+
+  // output DOS format, CRLF line endings...
+  return toDOS( str );
 }
 
 function output( machine ) {
-  // if you only want arcade games :)
+  // for smaller testing, just output 1943 games...  hit ctrl-c to finish early...
+  //if (!machine.name.match( /^194/ )) return;
+
+  // if you only want arcade games :)   (i do)
+  // computers dont have coin slots, so only output items with coins
   if (machine.coins == undefined) {
     //process.stdout.write( `${machine.name} '${machine.description}' (SOFTWARE, skipping!), ` );
     return;
   }
-  
-  /*if (
-    (machine.romof != undefined && machine.sampleof != undefined && machine.romof != machine.sampleof) ||
-    (machine.sampleof != undefined && machine.cloneof != undefined && machine.sampleof != machine.cloneof) ||
-    (machine.cloneof != undefined && machine.romof != undefined && machine.cloneof != machine.romof)
-    ) {
-    console.log( machine, "they dont match")
-  }*/
+
   process.stdout.write( machine.name + ', ' ); // output very short name so user can watch progress
   //process.stdout.write( createBlock( machine ) ); // DEBUG: output the mamewah.lst output to the screen
   writeStream.write( createBlock( machine ), 'utf8' );
@@ -88,7 +106,7 @@ saxStream.on("opentag", function (node) {
   //console.log( "open", stack.join( "/" ) );
 
   if (stack.join( "/" ) === "mame/machine") {
-    machine = { input_types: [] }; // <<-- new entry, zero out the machine.
+    machine = { input_type: [] }; // <<-- new entry, zero out the machine.
     machine.name = node.attributes.name
     machine.cloneof = node.attributes.cloneof
     machine.romof = node.attributes.romof
@@ -101,13 +119,13 @@ saxStream.on("opentag", function (node) {
     machine.coins = node.attributes.coins
   }
   if (stack.join( "/" ) === "mame/machine/input/control") {
-    //console.log( machine.input_types )
     function sanitizeInputType( attrs ) {
-      let ways = attrs.ways;
+      let ways = parseInt( attrs.ways ) ? `${parseInt( attrs.ways )}-Way` : attrs.ways;
       let map = { "joy": "Joystick" }
-      return (ways ? `${ways}-Way ` : ``) + capitalize(map[attrs.type] ? map[attrs.type] : attrs.type);
+      return (ways ? `${ways} ` : ``) + capitalize(map[attrs.type] ? map[attrs.type] : attrs.type);
     }
-    machine.input_types[sanitizeInputType( node.attributes )] = true;
+    machine.input_type[sanitizeInputType( node.attributes )] = true;
+    machine.input_types = Object.keys( machine.input_type ).join(", ")
   }
   if (stack.join( "/" ) === "mame/machine/sound") machine.sound_channels = node.attributes.channels
   if (stack.join( "/" ) === "mame/machine/driver") {
