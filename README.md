@@ -11,13 +11,13 @@ npm install
 ```
 
 ## usage:
-Output the listxml from mame:
+Output the listxml from Mame:
 ```
 mame64 -listxml > listxml.xml
 ```
-Convert the listxml to a mamewah lst file
+Convert the listxml to a Mamewah lst file
 ```
 convert.js listxml.xml mamewah.lst
 ```
-Then copy the mamewah.lst file to mamewah/files directory.  So, if your emulator is in mamewah/config/mame/mame.cfg, then copy to mamewah/files/mame.lst
+Then copy the mamewah.lst file to `mamewah/files` directory.  So, if your emulator is in `mamewah/config/mame/mame.cfg`, then copy to `mamewah/files/mame.lst`
 
