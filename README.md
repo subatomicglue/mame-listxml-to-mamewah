@@ -19,5 +19,5 @@ Convert the listxml to a mamewah lst file
 ```
 convert.js listxml.xml mamewah.lst
 ```
-Then copy the mamewah.lst file to mamewah/files directory.  So, if your emulator is in config/mame/mame.cfg, then copy to mamewah/files/mame.lst
+Then copy the mamewah.lst file to mamewah/files directory.  So, if your emulator is in mamewah/config/mame/mame.cfg, then copy to mamewah/files/mame.lst
 
